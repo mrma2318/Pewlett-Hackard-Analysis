@@ -23,45 +23,73 @@
 However, when looking at the [retirement_titles.csv](https://github.com/mrma2318/Pewlett-Hackard-Analysis/blob/c91d6a7cfb871c61f438e19455ec8a1920d1957f/Data/retirement_titles.csv) file, you can see there are duplicates. Therefore, in order to remove those duplicates, I used the DISTINCT ON() function for employee number from the retirement_titles.csv I just created. I also wanted to look at employees that were still employed there, so I also filtered the data to show only those with a to date of 9999-01-01. Then I saved the new dataset in another query and exported it as a CSV file called [unique_titles.csv](https://github.com/mrma2318/Pewlett-Hackard-Analysis/blob/c91d6a7cfb871c61f438e19455ec8a1920d1957f/Data/unique_titles.csv)
 
 -- Dictinct with Orderby to remove duplicate rows
+
 SELECT DISTINCT ON (emp_no) rt.emp_no,
+
 rt.first_name,
+
 rt.last_name,
+
 rt.title
 
 INTO unique_titles
+
 FROM retirement_titles AS rt
+
 WHERE (rt.to_date = '9999-01-01')
+
 ORDER BY rt.emp_no ASC, rt.to_date DESC;
 
 - I have all the employees and their most reecent job titles that are getting ready to retire. However, the list is very long, so in order to find the total number of employees that are retiring I can use the COUNT() function. 
 
 -- Retrieve the number of employees by their most recent job title
+
 SELECT COUNT(title),title 
+
 INTO retiring_titles
+
 FROM unique_titles 
+
 GROUP BY title
+
 ORDER BY COUNT(title) DESC;
 
 - Bobby also wanted me to create a mentorship-eligibility table that holds the current employees who were born between January 1, 1965 and December 31, 1965. Therefore, I needed to get the same variables I did to get the number of employees by title and use the DISTINCT ON() function based on employee number. However, I needed to join the tables not only on titles between the employees and titles CSV files, but also on employee number between the employees and dept_emp CSV files. 
 
 - In addition, I needed to organize the data where employees are still employeed and born between 1965-01-01 and 1965-12-31 to get the employees eligible to be a mentor. Once I got the data, I was able to save it into a table called mentorship_eligibility and export it as a CSV called [mentorship_eligibility.csv](https://github.com/mrma2318/Pewlett-Hackard-Analysis/blob/c91d6a7cfb871c61f438e19455ec8a1920d1957f/Data/mentorship_eligibility.csv). 
 
--- Create a mentorship-eligbility table
+-- Creating a mentorship-eligbility table
+
 SELECT DISTINCT ON (emp_no) e.emp_no,
+
     e.first_name,
+
     e.last_name,
+
     e.birth_date,
+
     de.from_date,
+
     de.to_date,
+
     titles.title
+
 INTO mentorship_eligibility
+
 FROM employees AS e
+
 INNER JOIN dept_emp AS de
+
 ON (e.emp_no = de.emp_no)
+
 INNER JOIN titles
+
 ON (e.emp_no = title.emp_no)
+
 WHERE (de.to_date = '9999-01-01')
+
 AND (e.birth_date BETWEEN '1965-01-01' AND '1965-12-31')
+
 ORDER BY e.emp_no ASC;
 
 ## Results
